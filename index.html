@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Finance Planner - Quản lý tài chính gia đình cao cấp</title>
+    <meta name="description" content="Ứng dụng quản lý tài chính cá nhân và gia đình trực quan, hỗ trợ theo dõi thu chi, ngân sách, tiết kiệm và báo cáo biểu đồ trực quan.">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- --- SIDEBAR --- -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <span class="logo-text">FamFinance</span>
+            </div>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item active" data-tab="dashboard">
+                        <a class="nav-link"><i class="fa-solid fa-chart-pie"></i><span>Tổng quan</span></a>
+                    </li>
+                    <li class="nav-item" data-tab="transactions">
+                        <a class="nav-link"><i class="fa-solid fa-list-check"></i><span>Giao dịch</span></a>
+                    </li>
+                    <li class="nav-item" data-tab="budgets">
+                        <a class="nav-link"><i class="fa-solid fa-sliders"></i><span>Ngân sách</span></a>
+                    </li>
+                    <li class="nav-item" data-tab="savings">
+                        <a class="nav-link"><i class="fa-solid fa-piggy-bank"></i><span>Tiết kiệm</span></a>
+                    </li>
+                    <li class="nav-item" data-tab="reports">
+                        <a class="nav-link"><i class="fa-solid fa-chart-line"></i><span>Báo cáo</span></a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="profile-card">
+                    <div class="profile-avatar">M</div>
+                    <div class="profile-info">
+                        <span class="profile-name">Mẹ (Thủ quỹ)</span>
+                        <span class="profile-role">Quản trị viên</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- --- MAIN CONTENT --- -->
+        <main class="main-content">
+            <!-- --- HEADER --- -->
+            <header class="header">
+                <div class="welcome-section">
+                    <h1 id="welcome-title">Xin chào, Gia đình!</h1>
+                    <p id="current-date-display">Hôm nay là ngày 3 tháng 6 năm 2026</p>
+                </div>
+                
+                <div class="header-actions">
+                    <!-- Bộ lọc Tháng/Năm cho Dashboard & Báo cáo -->
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="header-filter-month" class="period-selector">
+                            <option value="1">Tháng 1</option>
+                            <option value="2">Tháng 2</option>
+                            <option value="3">Tháng 3</option>
+                            <option value="4">Tháng 4</option>
+                            <option value="5">Tháng 5</option>
+                            <option value="6" selected>Tháng 6</option>
+                            <option value="7">Tháng 7</option>
+                            <option value="8">Tháng 8</option>
+                            <option value="9">Tháng 9</option>
+                            <option value="10">Tháng 10</option>
+                            <option value="11">Tháng 11</option>
+                            <option value="12">Tháng 12</option>
+                        </select>
+                        <select id="header-filter-year" class="period-selector">
+                            <option value="2025">2025</option>
+                            <option value="2026" selected>2026</option>
+                            <option value="2027">2027</option>
+                        </select>
+                    </div>
+
+                    <button class="btn-primary" id="btn-add-tx-quick">
+                        <i class="fa-solid fa-plus"></i> Thêm giao dịch
+                    </button>
+                </div>
+            </header>
+
+            <!-- --- DYNAMIC VIEW CONTAINERS --- -->
+
+            <!-- 1. DASHBOARD VIEW -->
+            <section id="dashboard-view" class="tab-view active-view">
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card balance">
+                        <div class="stat-header">
+                            <span class="stat-title">Số dư hiện tại</span>
+                            <div class="stat-icon-wrapper">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="val-net-balance">0đ</div>
+                        <div class="stat-trend neutral">
+                            <i class="fa-solid fa-circle-info"></i> Tích lũy toàn thời gian
+                        </div>
+                    </div>
+
+                    <div class="stat-card income">
+                        <div class="stat-header">
+                            <span class="stat-title">Thu nhập (Tháng này)</span>
+                            <div class="stat-icon-wrapper">
+                                <i class="fa-solid fa-arrow-down-long"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="val-monthly-income">0đ</div>
+                        <div class="stat-trend up">
+                            <i class="fa-solid fa-arrow-trend-up"></i> So với chi tiêu
+                        </div>
+                    </div>
+
+                    <div class="stat-card expense">
+                        <div class="stat-header">
+                            <span class="stat-title">Chi tiêu (Tháng này)</span>
+                            <div class="stat-icon-wrapper">
+                                <i class="fa-solid fa-arrow-up-long"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="val-monthly-expense">0đ</div>
+                        <div class="stat-trend down">
+                            <i class="fa-solid fa-arrow-trend-down"></i> Tự động tính hạn mức
+                        </div>
+                    </div>
+
+                    <div class="stat-card saved">
+                        <div class="stat-header">
+                            <span class="stat-title">Mục tiêu tiết kiệm</span>
+                            <div class="stat-icon-wrapper">
+                                <i class="fa-solid fa-piggy-bank"></i>
+                            </div>
+                        </div>
+                        <div class="stat-value" id="val-total-saved">0đ</div>
+                        <div class="stat-trend up">
+                            <i class="fa-solid fa-heart"></i> Tổng tiền đã tích lũy
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Charts & Detailed info -->
+                <div class="dashboard-grid" style="margin-top: 1.5rem;">
+                    <!-- Left column: Trend and transactions -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3 class="panel-title"><i class="fa-solid fa-chart-column"></i> Xu hướng Thu - Chi</h3>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-dashboard-trend"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3 class="panel-title"><i class="fa-solid fa-history"></i> Giao dịch gần đây</h3>
+                                <button class="btn-secondary" style="width: auto; padding: 0.4rem 0.8rem;" onclick="app.switchTab('transactions')">
+                                    Xem tất cả
+                                </button>
+                            </div>
+                            <div class="transaction-list" id="dashboard-recent-transactions">
+                                <!-- Chèn động bởi Javascript -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right column: Member split and mini Budgets -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3 class="panel-title"><i class="fa-solid fa-users"></i> Chi tiêu theo thành viên</h3>
+                            </div>
+                            <div class="chart-container" style="min-height: 220px;">
+                                <canvas id="chart-dashboard-member"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3 class="panel-title"><i class="fa-solid fa-bullseye"></i> Ngân sách cần lưu ý</h3>
+                            </div>
+                            <div class="transaction-list" id="dashboard-budgets-brief" style="max-height: 250px;">
+                                <!-- Hiển thị các ngân sách có phần trăm chi tiêu lớn nhất -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. TRANSACTIONS VIEW -->
+            <section id="transactions-view" class="tab-view" style="display: none;">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title"><i class="fa-solid fa-receipt"></i> Sổ Giao Dịch Chi Tiết</h3>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="filter-bar">
+                        <div class="search-input-wrapper">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="tx-search" class="search-input" placeholder="Tìm kiếm theo ghi chú...">
+                        </div>
+
+                        <select id="tx-filter-type" class="filter-select">
+                            <option value="all">Tất cả loại</option>
+                            <option value="income">Thu nhập</option>
+                            <option value="expense">Chi tiêu</option>
+                        </select>
+
+                        <select id="tx-filter-category" class="filter-select">
+                            <option value="all">Tất cả danh mục</option>
+                            <!-- Chèn động -->
+                        </select>
+
+                        <select id="tx-filter-member" class="filter-select">
+                            <option value="all">Thành viên</option>
+                            <!-- Chèn động -->
+                        </select>
+
+                        <select id="tx-filter-account" class="filter-select">
+                            <option value="all">Tài khoản/Ví</option>
+                            <!-- Chèn động -->
+                        </select>
+                    </div>
+
+                    <!-- Transaction List -->
+                    <div class="transaction-list" id="transactions-main-list" style="max-height: 550px;">
+                        <!-- Danh sách giao dịch -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. BUDGETS VIEW -->
+            <section id="budgets-view" class="tab-view" style="display: none;">
+                <div class="panel-card" style="margin-bottom: 1.5rem;">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title"><i class="fa-solid fa-sliders"></i> Quản Lý Hạn Mức Chi Tiêu</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                                Đặt hạn mức chi tiêu hàng tháng cho từng danh mục để tránh vượt chi.
+                            </p>
+                        </div>
+                        <button class="btn-primary" id="btn-add-budget">
+                            <i class="fa-solid fa-plus"></i> Thiết lập hạn mức
+                        </button>
+                    </div>
+                </div>
+
+                <div class="budget-grid" id="budgets-main-grid">
+                    <!-- Thẻ ngân sách động -->
+                </div>
+            </section>
+
+            <!-- 4. SAVINGS VIEW -->
+            <section id="savings-view" class="tab-view" style="display: none;">
+                <div class="panel-card" style="margin-bottom: 1.5rem;">
+                    <div class="panel-header">
+                        <div>
+                            <h3 class="panel-title"><i class="fa-solid fa-piggy-bank"></i> Kế hoạch Tiết Kiệm Tích Lũy</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                                Tạo và theo dõi tiến độ các mục tiêu mua sắm, quỹ khẩn cấp của gia đình.
+                            </p>
+                        </div>
+                        <button class="btn-primary" id="btn-add-goal">
+                            <i class="fa-solid fa-plus"></i> Tạo mục tiêu mới
+                        </button>
+                    </div>
+                </div>
+
+                <div class="goals-grid" id="goals-main-grid">
+                    <!-- Thẻ mục tiêu động -->
+                </div>
+            </section>
+
+            <!-- 5. REPORTS VIEW -->
+            <section id="reports-view" class="tab-view" style="display: none;">
+                <div class="reports-layout">
+                    <!-- Left Column: Category Chart -->
+                    <div class="panel-card">
+                        <div class="panel-header">
+                            <h3 class="panel-title"><i class="fa-solid fa-chart-pie"></i> Cơ cấu Chi Tiêu Danh Mục</h3>
+                        </div>
+                        <div class="chart-container" style="min-height: 300px;">
+                            <canvas id="chart-reports-category"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Analytics Cards -->
+                    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3 class="panel-title"><i class="fa-solid fa-brain"></i> Phân tích Thông minh</h3>
+                            </div>
+                            <div class="report-summary-box">
+                                <div class="mini-report-card">
+                                    <div class="mini-report-title">Chi nhiều nhất</div>
+                                    <div class="mini-report-value" id="report-highest-category" style="color: var(--expense)">N/A</div>
+                                </div>
+                                <div class="mini-report-card">
+                                    <div class="mini-report-title">Thành viên chi nhiều</div>
+                                    <div class="mini-report-value" id="report-highest-member" style="color: #a5b4fc">N/A</div>
+                                </div>
+                                <div class="mini-report-card">
+                                    <div class="mini-report-title">Tỷ lệ tiết kiệm</div>
+                                    <div class="mini-report-value" id="report-saving-rate" style="color: var(--income)">0%</div>
+                                </div>
+                                <div class="mini-report-card">
+                                    <div class="mini-report-title">Tích lũy thực tế</div>
+                                    <div class="mini-report-value" id="report-net-savings" style="color: var(--warning)">0đ</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-card">
+                            <div class="panel-header">
+                                <h3 class="panel-title"><i class="fa-solid fa-file-export"></i> Xuất Dữ Liệu</h3>
+                            </div>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                                Lưu trữ dữ liệu tài chính của gia đình bạn dưới dạng các định dạng file phổ biến để lưu trữ cá nhân.
+                            </p>
+                            <div style="display: flex; gap: 1rem;">
+                                <button class="btn-secondary" id="btn-export-csv" style="flex: 1;">
+                                    <i class="fa-solid fa-file-csv"></i> Xuất CSV (Excel)
+                                </button>
+                                <button class="btn-secondary" id="btn-export-json" style="flex: 1;">
+                                    <i class="fa-solid fa-file-code"></i> Sao lưu JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- === SYSTEM MODALS === -->
+
+    <!-- 1. MODAL THÊM / SỬA GIAO DỊCH -->
+    <div class="modal-overlay" id="modal-transaction">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="transaction-modal-title">Thêm Giao Dịch</h3>
+                <button class="modal-close" onclick="app.closeModal('modal-transaction')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="form-transaction">
+                <input type="hidden" id="tx-id-input">
+                
+                <div class="type-toggle-wrapper">
+                    <button type="button" class="type-btn active expense" id="tx-type-expense" onclick="app.setTxType('expense')">
+                        Chi tiêu
+                    </button>
+                    <button type="button" class="type-btn income" id="tx-type-income" onclick="app.setTxType('income')">
+                        Thu nhập
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="tx-amount">Số tiền (đ)</label>
+                    <input type="text" id="tx-amount" class="form-control" placeholder="Ví dụ: 200.000" required inputmode="numeric">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="tx-date">Ngày giao dịch</label>
+                        <input type="date" id="tx-date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tx-category">Danh mục</label>
+                        <select id="tx-category" class="form-control" required>
+                            <!-- Chèn động tùy theo thu/chi -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="tx-member">Thành viên thực hiện</label>
+                        <select id="tx-member" class="form-control" required>
+                            <!-- Chèn động -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tx-account">Tài khoản/Ví thanh toán</label>
+                        <select id="tx-account" class="form-control" required>
+                            <!-- Chèn động -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="tx-notes">Ghi chú / Mô tả</label>
+                    <input type="text" id="tx-notes" class="form-control" placeholder="Ăn trưa, đổ xăng xe, lương tháng...">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" style="flex-grow: 0;" onclick="app.closeModal('modal-transaction')">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu giao dịch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MODAL THIẾT LẬP HẠN MỨC NGÂN SÁCH -->
+    <div class="modal-overlay" id="modal-budget">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Đặt Hạn Mức Ngân Sách</h3>
+                <button class="modal-close" onclick="app.closeModal('modal-budget')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="form-budget">
+                <div class="form-group">
+                    <label class="form-label" for="budget-category-select">Danh mục chi tiêu</label>
+                    <select id="budget-category-select" class="form-control" required>
+                        <!-- Danh sách danh mục chi tiêu động -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="budget-amount">Hạn mức hàng tháng (đ)</label>
+                    <input type="text" id="budget-amount" class="form-control" placeholder="Ví dụ: 5.000.000" required inputmode="numeric">
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" style="flex-grow: 0;" onclick="app.closeModal('modal-budget')">Hủy</button>
+                    <button type="submit" class="btn-primary">Áp dụng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. MODAL THÊM / SỬA MỤC TIÊU TIẾT KIỆM -->
+    <div class="modal-overlay" id="modal-goal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" id="goal-modal-title">Tạo Mục Tiêu Tiết Kiệm</h3>
+                <button class="modal-close" onclick="app.closeModal('modal-goal')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="form-goal">
+                <input type="hidden" id="goal-id-input">
+                
+                <div class="form-group">
+                    <label class="form-label" for="goal-name">Tên mục tiêu</label>
+                    <input type="text" id="goal-name" class="form-control" placeholder="Ví dụ: Mua tivi mới, Quỹ dự phòng..." required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="goal-target-amount">Số tiền mục tiêu (đ)</label>
+                        <input type="text" id="goal-target-amount" class="form-control" placeholder="Ví dụ: 10.000.000" required inputmode="numeric">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="goal-current-amount">Số tiền hiện có (đ)</label>
+                        <input type="text" id="goal-current-amount" class="form-control" value="0" inputmode="numeric">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="goal-target-date">Ngày dự kiến hoàn thành</label>
+                    <input type="date" id="goal-target-date" class="form-control" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" style="flex-grow: 0;" onclick="app.closeModal('modal-goal')">Hủy</button>
+                    <button type="submit" class="btn-primary">Lưu mục tiêu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. MODAL NẠP TIỀN TIẾT KIỆM (CONTRIBUTION) -->
+    <div class="modal-overlay" id="modal-contribution">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title">Trích Tiền Tiết Kiệm</h3>
+                <button class="modal-close" onclick="app.closeModal('modal-contribution')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form id="form-contribution">
+                <input type="hidden" id="contribution-goal-id">
+                
+                <div class="form-group">
+                    <label class="form-label">Mục tiêu tích lũy</label>
+                    <input type="text" id="contribution-goal-name" class="form-control" disabled style="opacity: 0.7;">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="contribution-amount">Số tiền trích tích lũy (đ)</label>
+                    <input type="text" id="contribution-amount" class="form-control" placeholder="Ví dụ: 1.000.000" required inputmode="numeric">
+                    <small style="color: var(--text-secondary); margin-top: 0.25rem; display: block;">
+                        Số tiền này sẽ được chuyển vào quỹ tiết kiệm và ghi nhận là 1 khoản "Chi tiêu tích lũy" từ tài khoản chính.
+                    </small>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" style="flex-grow: 0;" onclick="app.closeModal('modal-contribution')">Hủy</button>
+                    <button type="submit" class="btn-primary">Xác nhận chuyển</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ChartJS library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/chart-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
