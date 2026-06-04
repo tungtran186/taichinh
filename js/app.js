@@ -838,9 +838,9 @@
     }
 
     // --- KHỞI CHẠY HỆ THỐNG ---
-    function init() {
-        // Khởi động kho dữ liệu LocalStorage
-        window.Store.init();
+    async function init() {
+        // Khởi động kho dữ liệu (LocalStorage + Firestore)
+        await window.Store.init();
 
         // Hiển thị ngày tháng trên Header
         displayCurrentHeaderDate();
@@ -928,7 +928,12 @@
         deleteBudget,
         openEditGoal,
         deleteGoal,
-        openContribution
+        openContribution,
+        // Dùng bởi store.js sau khi tải dữ liệu Firestore xong
+        refreshAllViews() {
+            populateFormSelects();
+            refreshActiveTab();
+        }
     };
 
     // Đợi DOM sẵn sàng rồi chạy ứng dụng
