@@ -522,9 +522,26 @@
         </div>
     </div>
 
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Sync Status Indicator -->
+    <div id="sync-status" class="syncing">
+        <div class="sync-dot"></div>
+        <span id="sync-status-text">Đang kết nối...</span>
+    </div>
+
     <!-- ChartJS library CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
+    <!-- Firebase SDK (Compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+
+    <!-- Firebase Configuration -->
+    <script src="js/firebase-config.js"></script>
+
     <!-- Application Scripts -->
     <script src="js/store.js"></script>
     <script src="js/chart-manager.js"></script>
