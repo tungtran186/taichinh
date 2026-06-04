@@ -1086,3 +1086,72 @@ select option {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========== TOAST NOTIFICATIONS ========== */
+#toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    pointer-events: none;
+}
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.1rem;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+    backdrop-filter: blur(12px);
+    border: 1px solid;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    pointer-events: auto;
+    min-width: 220px;
+    max-width: 340px;
+}
+.toast.removing { animation: toastOut 0.3s ease forwards; }
+.toast.success { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
+.toast.error   { background: rgba(244,63,94,0.15);  border-color: rgba(244,63,94,0.4);  color: #fda4af; }
+.toast.warning { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.4); color: #fcd34d; }
+.toast.info    { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
+.toast i { font-size: 1rem; flex-shrink: 0; }
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(60px) scale(0.9); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(0) scale(1); }
+    to   { opacity: 0; transform: translateX(60px) scale(0.9); }
+}
+
+/* ========== SYNC STATUS INDICATOR ========== */
+#sync-status {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: var(--font-body);
+    backdrop-filter: blur(10px);
+    border: 1px solid;
+    transition: all 0.3s ease;
+    cursor: default;
+}
+#sync-status.synced  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+#sync-status.syncing { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.3); color: #a5b4fc; }
+#sync-status.offline { background: rgba(244,63,94,0.1);  border-color: rgba(244,63,94,0.3);  color: #fda4af; }
+#sync-status .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+#sync-status.syncing .sync-dot { animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
