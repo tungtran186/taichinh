@@ -236,6 +236,17 @@
                         </select>
                     </div>
 
+                    <!-- Bulk Actions Bar -->
+                    <div class="bulk-actions-bar" id="tx-bulk-actions" style="display: none; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); margin-top: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <input type="checkbox" id="tx-select-all" style="cursor: pointer; width: 18px; height: 18px; accent-color: var(--primary);">
+                            <label for="tx-select-all" style="cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text-primary);">Chọn tất cả hiển thị</label>
+                        </div>
+                        <button class="btn-primary" id="btn-bulk-delete" style="background: linear-gradient(135deg, var(--expense) 0%, #be123c 100%); padding: 0.55rem 1rem; font-size: 0.85rem; opacity: 0.5; cursor: not-allowed; width: auto; box-shadow: 0 4px 12px var(--expense-glow);" disabled>
+                            <i class="fa-solid fa-trash-can"></i> Xóa hàng loạt (<span id="bulk-delete-count">0</span>)
+                        </button>
+                    </div>
+
                     <!-- Transaction List -->
                     <div class="transaction-list" id="transactions-main-list" style="max-height: 550px;">
                         <!-- Danh sách giao dịch -->
@@ -520,6 +531,23 @@
                     <button type="submit" class="btn-primary">Xác nhận chuyển</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 5. MODAL XÁC NHẬN XÓA HÀNG LOẠT -->
+    <div class="modal-overlay" id="modal-confirm-delete">
+        <div class="modal-container" style="max-width: 400px; text-align: center;">
+            <div style="margin-bottom: 1.5rem; color: var(--expense);">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 3.5rem; filter: drop-shadow(0 0 15px rgba(244, 63, 94, 0.4));"></i>
+            </div>
+            <h3 class="modal-title" style="margin-bottom: 0.75rem; display: block; width: 100%;">Xác nhận xóa hàng loạt</h3>
+            <p id="confirm-delete-message" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2rem;">
+                Bạn có chắc chắn muốn xóa <strong id="confirm-delete-count" style="color: var(--expense);">0</strong> giao dịch đã chọn? Hành động này sẽ xóa vĩnh viễn dữ liệu và không thể hoàn tác.
+            </p>
+            <div class="form-actions" style="display: flex; gap: 1rem;">
+                <button type="button" class="btn-secondary" style="flex: 1;" onclick="app.closeModal('modal-confirm-delete')">Hủy</button>
+                <button type="button" id="btn-confirm-delete-submit" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, var(--expense) 0%, #be123c 100%); box-shadow: 0 4px 12px var(--expense-glow);">Xác nhận xóa</button>
+            </div>
         </div>
     </div>
 
