@@ -3,6 +3,7 @@
 (function() {
     let currentTab = 'dashboard';
     let currentTxType = 'expense'; // mặc định là chi tiêu khi tạo giao dịch mới
+    let selectedTxIds = []; // danh sách ID giao dịch được chọn để xóa hàng loạt
     
     // Định dạng tiền tệ VND chuyên nghiệp (ví dụ: 15.000.000 đ)
     function formatVND(amount) {
@@ -172,6 +173,107 @@
         }
     }
 
+    // --- QUẢN LÝ XÓA HÀNG LOẠT ---
+    
+    // Cập nhật giao diện quản lý hàng loạt và nút xóa
+    function updateBulkActionsUI() {
+        const bulkBar = document.getElementById('tx-bulk-actions');
+        const countEl = document.getElementById('bulk-delete-count');
+        const btnDelete = document.getElementById('btn-bulk-delete');
+        const selectAllCb = document.getElementById('tx-select-all');
+        
+        if (!bulkBar || !countEl || !btnDelete) return;
+
+        const renderedCheckboxes = document.querySelectorAll('.tx-checkbox');
+        
+        // Hiển thị thanh hành động hàng loạt nếu có giao dịch đang hiển thị ở tab Giao dịch
+        if (currentTab === 'transactions' && renderedCheckboxes.length > 0) {
+            bulkBar.style.display = 'flex';
+        } else {
+            bulkBar.style.display = 'none';
+            return;
+        }
+
+        // Cập nhật số lượng hiển thị
+        countEl.textContent = selectedTxIds.length;
+
+        // Bật/tắt nút Xóa hàng loạt
+        if (selectedTxIds.length > 0) {
+            btnDelete.removeAttribute('disabled');
+            btnDelete.style.opacity = '1';
+            btnDelete.style.cursor = 'pointer';
+        } else {
+            btnDelete.setAttribute('disabled', 'true');
+            btnDelete.style.opacity = '0.5';
+            btnDelete.style.cursor = 'not-allowed';
+        }
+
+        // Cập nhật checkbox "Chọn tất cả" nếu tất cả checkbox con đều được check
+        if (renderedCheckboxes.length > 0) {
+            const allChecked = Array.from(renderedCheckboxes).every(cb => cb.checked);
+            selectAllCb.checked = allChecked;
+        } else {
+            selectAllCb.checked = false;
+        }
+    }
+
+    // Xử lý khi click checkbox đơn lẻ
+    function handleCheckboxChange(checkbox) {
+        const id = checkbox.value;
+        if (checkbox.checked) {
+            if (!selectedTxIds.includes(id)) {
+                selectedTxIds.push(id);
+            }
+        } else {
+            selectedTxIds = selectedTxIds.filter(item => item !== id);
+        }
+        updateBulkActionsUI();
+    }
+
+    // Xử lý khi click checkbox "Chọn tất cả"
+    function handleSelectAllChange(e) {
+        const checked = e.target.checked;
+        const renderedCheckboxes = document.querySelectorAll('.tx-checkbox');
+        
+        renderedCheckboxes.forEach(cb => {
+            cb.checked = checked;
+            const id = cb.value;
+            if (checked) {
+                if (!selectedTxIds.includes(id)) {
+                    selectedTxIds.push(id);
+                }
+            } else {
+                selectedTxIds = selectedTxIds.filter(item => item !== id);
+            }
+        });
+        
+        updateBulkActionsUI();
+    }
+
+    // Mở popup xác nhận xóa hàng loạt
+    function showBulkDeleteConfirm() {
+        if (selectedTxIds.length === 0) return;
+        
+        const countEl = document.getElementById('confirm-delete-count');
+        if (countEl) countEl.textContent = selectedTxIds.length;
+        
+        openModal('modal-confirm-delete');
+    }
+
+    // Xác nhận thực hiện xóa hàng loạt
+    function handleBulkDeleteSubmit() {
+        if (selectedTxIds.length === 0) return;
+        
+        const success = window.Store.deleteTransactions(selectedTxIds);
+        if (success) {
+            window.Store.showToast(`Đã xóa thành công ${selectedTxIds.length} giao dịch!`, 'success');
+        }
+        
+        selectedTxIds = [];
+        closeModal('modal-confirm-delete');
+        refreshActiveTab();
+    }
+
     // --- RENDERING TABS ---
 
     // 1. Render Dashboard Tab
@@ -210,15 +312,24 @@
     }
 
     // Hàm tạo HTML cho 1 dòng giao dịch
-    function createTransactionItemHTML(t) {
+    function createTransactionItemHTML(t, showCheckbox = false) {
         const icon = window.Store.getCategoryIcon(t.category);
         const color = window.Store.getCategoryColor(t.category);
         const sign = t.type === 'income' ? '+' : '-';
         const amountClass = t.type === 'income' ? 'income' : 'expense';
         
+        // Trạng thái checked của checkbox nếu ID nằm trong danh sách được chọn
+        const isChecked = selectedTxIds.includes(t.id) ? 'checked' : '';
+        const checkboxHTML = showCheckbox ? `
+            <label class="tx-checkbox-container" style="display: flex; align-items: center; margin-right: 0.75rem; cursor: pointer;">
+                <input type="checkbox" class="tx-checkbox" value="${t.id}" ${isChecked} style="cursor: pointer; width: 18px; height: 18px; accent-color: var(--primary); border-radius: 4px;">
+            </label>
+        ` : '';
+        
         return `
             <div class="transaction-item">
                 <div class="tx-left">
+                    ${checkboxHTML}
                     <div class="tx-category-icon" style="background: rgba(${color.replace('hsl', '').replace(')', '')}, 0.1); color: ${color};">
                         <i class="fa-solid ${icon}"></i>
                     </div>
@@ -310,6 +421,11 @@
     function renderTransactions() {
         const txs = getFilteredTransactions();
         
+        // Reset lựa chọn khi render lại hoặc thay đổi bộ lọc
+        selectedTxIds = [];
+        const selectAllCb = document.getElementById('tx-select-all');
+        if (selectAllCb) selectAllCb.checked = false;
+
         // Lấy các giá trị bộ lọc
         const searchQuery = document.getElementById('tx-search').value.toLowerCase().trim();
         const typeFilter = document.getElementById('tx-filter-type').value;
@@ -343,8 +459,11 @@
                     <p class="empty-state-text">Không tìm thấy giao dịch nào phù hợp với bộ lọc của bạn.</p>
                 </div>`;
         } else {
-            listContainer.innerHTML = filtered.map(t => createTransactionItemHTML(t)).join('');
+            listContainer.innerHTML = filtered.map(t => createTransactionItemHTML(t, true)).join('');
         }
+
+        // Cập nhật giao diện quản lý hàng loạt
+        updateBulkActionsUI();
     }
 
     // 3. Render Budgets Tab
@@ -908,6 +1027,34 @@
         document.getElementById('tx-filter-category').addEventListener('change', renderTransactions);
         document.getElementById('tx-filter-member').addEventListener('change', renderTransactions);
         document.getElementById('tx-filter-account').addEventListener('change', renderTransactions);
+
+        // Sự kiện chọn tất cả giao dịch hiển thị
+        const selectAllCb = document.getElementById('tx-select-all');
+        if (selectAllCb) {
+            selectAllCb.addEventListener('change', handleSelectAllChange);
+        }
+
+        // Sự kiện cho từng checkbox đơn lẻ (Sử dụng Event Delegation trên container danh sách giao dịch)
+        const txListContainer = document.getElementById('transactions-main-list');
+        if (txListContainer) {
+            txListContainer.addEventListener('change', function(e) {
+                if (e.target && e.target.classList.contains('tx-checkbox')) {
+                    handleCheckboxChange(e.target);
+                }
+            });
+        }
+
+        // Nút kích hoạt mở popup xác nhận xóa hàng loạt
+        const btnBulkDelete = document.getElementById('btn-bulk-delete');
+        if (btnBulkDelete) {
+            btnBulkDelete.addEventListener('click', showBulkDeleteConfirm);
+        }
+
+        // Nút đồng ý xóa trong popup xác nhận xóa hàng loạt
+        const btnConfirmDeleteSubmit = document.getElementById('btn-confirm-delete-submit');
+        if (btnConfirmDeleteSubmit) {
+            btnConfirmDeleteSubmit.addEventListener('click', handleBulkDeleteSubmit);
+        }
 
         // Gán nút Xuất dữ liệu
         document.getElementById('btn-export-csv').addEventListener('click', exportToCSV);
