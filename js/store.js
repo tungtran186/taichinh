@@ -291,6 +291,17 @@
             return false;
         },
 
+        deleteTransactions(ids) {
+            if (!Array.isArray(ids) || ids.length === 0) return false;
+            state.transactions = state.transactions.filter(t => !ids.includes(t.id));
+            save();
+            return true;
+        },
+
+        showToast(message, type = 'info', durationMs = 3500) {
+            showToast(message, type, durationMs);
+        },
+
         // --- NGÂN SÁCH ---
         getBudgets() { return state.budgets; },
 
